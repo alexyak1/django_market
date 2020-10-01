@@ -7,7 +7,19 @@
 </head>
 
 <body>
-    <h1>Hello there, golobomantics store front Electronics page coming here</h1>
+    {% if messages %}
+    <ul class="messages">
+        {% for msg in messages %}
+        <li>
+            <div class='alert alert-{{msg.level_tag}} role=' alert '>
+                {{msg.message}}
+            </div>
+        </li>
+        {% endfor %}
+    {% endif%}
+
+    <h1>Hello there, {{ request.session.customer }} have visited this site {{ request.COOKIES.visits|default:"1"}} times</h1>
+
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -23,17 +35,20 @@
         </tbody>
     </table>
 
-    {% if is_paginated %}
-    <tr class="pagination">
-        {% if page_obj.has_previous %}
-        <td><span><a href="?page={{ item.previous_page_number }}">Previous</a></span></td>
+    <table>
+        {% if items.has_other_pages %}
+        <tr class="pagination">
+            {% if items.has_previous %}
+            <td><button><a href="?page={{ item.previous_page_number }}">Previous</a></button></td>
+            {% endif %}
+            <td class="">
+                <span>Page {{ items.number }} or {{ items.paginator.num_pages }}.</span>
+            </td>
+            {% if items.has_next %}
+            <td><button><a href="?page={{ items.next_page_number }}">Next</a></button></td>
+            {% endif %}
+        </tr>
         {% endif %}
-        <td class="">
-            <span>Page {{ page_obj.number }} or {{ page_obj.paginator.num_pages }}.</span>
-        </td>
-        {% if page_obj.has_next %}
-        <td><span><a href="?page={{ page_obj.next_page_number }}">Next</a></span></td>
-        {% endif %}
-    </tr>
-    {% endif %}
+    </table>
+    <a href="/logout">Logout</a>
 </body>

@@ -5,6 +5,7 @@ from django.core.paginator import Paginator, PageNotAnInteger
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import TemplateView, ListView
+from django.contrib import messages
 
 
 def index(request):
@@ -13,19 +14,45 @@ def index(request):
 def detail(request):
     return HttpResponse("Hello there")
 
+def logout(request):
+    try:
+        del request.session['customer']
+    except KeyError:
+        print('Error while loggin out')
+    return HttpResponse('You are logged out.')
+            
+
 # @require_http_methods(["GET"])
-# # @cache_page(900)
+# @cache_page(900)
 class ElectronicsView(View):
     def get(self, request):
         items = ("Windows PC", "Apple Mac", "Apple iPhone", "Lenovo", "Samsung", "Google")
         paginator = Paginator(items, 2)
         pages = request.GET.get('page', 1)
-        self.process()
+
+        name = "Alex"
+        # self.process()
+        messages.info(request, 'Customer successfully fethed')
         try:
             items = paginator.page(pages)
         except PageNotAnInteger:
             items = paginator.page(1)
-        return render(request, 'store/list.html', {'items': items})
+        if not request.session.has_key('customer'):
+            request.session['customer'] = name
+            print('session value set')
+        response = render(request, 'store/list.html', {'items': items})
+        if request.COOKIES.get('visits'):
+            value = int(request.COOKIES.get('visits'))
+            print('Getting Cookie.')
+            response.set_cookie('visits', value + 1)
+        else:
+            value = 1
+            print('Setting Cookie.')
+            response.set_cookie('visits', value)
+
+        return response
+    
+
 
 class ElectronicsView2(TemplateView):
     template_name = 'store/list.html'
